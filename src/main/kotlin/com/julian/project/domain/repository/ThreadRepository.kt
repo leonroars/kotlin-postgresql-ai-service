@@ -7,6 +7,9 @@ import com.julian.project.domain.Thread
 
 interface ThreadRepository : JpaRepository<Thread, Long> {
 
+    // 사용자 ID 로 전체 조회
+    fun findAllByUserId(userId: Long, pageable: Pageable): Page<Thread>
+
     // 스레드 판단용 (30분 규칙)
     fun findTopByUserIdOrderByUpdatedAtDesc(userId: Long): Thread?
 
@@ -15,5 +18,4 @@ interface ThreadRepository : JpaRepository<Thread, Long> {
 
     // 관리자용 전체 조회
     fun findAllByOrderByCreatedAtDesc(pageable: Pageable) : Page<Thread>
-
 }

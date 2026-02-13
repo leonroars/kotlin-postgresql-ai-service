@@ -7,4 +7,7 @@ interface ChatRepository : JpaRepository<Chat, Long> {
 
     // 스레드 내 대화 히스토리 (OpenAI API 요청용)
     fun findByThreadIdOrderByCreatedAt(threadId: Long) : List<Chat>
+
+    // 스레드 내 대화 히스토리
+    fun findByThreadIdOrderByCreatedAtAsc(threadId: Long) : List<Chat>
 }
