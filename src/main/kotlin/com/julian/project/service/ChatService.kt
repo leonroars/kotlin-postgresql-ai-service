@@ -8,6 +8,7 @@ import com.julian.project.domain.repository.UserRepository
 import com.julian.project.dto.ChatCreateRequest
 import com.julian.project.dto.ChatResponse
 import com.julian.project.dto.ThreadResponse
+import com.julian.project.infrastructure.ai.AiClient
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -18,7 +19,8 @@ import java.time.LocalDateTime
 class ChatService(
     private val userRepository: UserRepository,
     private val threadRepository: ThreadRepository,
-    private val chatRepository: ChatRepository
+    private val chatRepository: ChatRepository,
+    private val aiClient: AiClient
 ) {
     @Transactional
     fun createChat(userId: Long, request: ChatCreateRequest): ChatResponse {
@@ -27,8 +29,16 @@ class ChatService(
 
         val thread = getOrCreateThread(user)
 
-        // TODO: 실제 AI 연동으로 교체
-        val answer = "Mock AI 답변: ${request.question}"
+        // 기존 대화 히스토리 조회 및 OpenAI messages 형식으로 변환
+        val chatHistory = chatRepository.findByThreadIdOrderByCreatedAtAsc(thread.id!!)
+        val messages = buildMessages(chatHistory, request.question)
+
+        // AI 응답 생성 (실패 시 fallback)
+        val answer = try {
+            aiClient.chat(messages)
+        } catch (e: Exception) {
+            "AI 응답을 생성할 수 없습니다."
+        }
 
         val chat = Chat(
             thread = thread,
@@ -81,5 +91,18 @@ class ChatService(
             return threadRepository.save(Thread(user = user))
         }
         return latest
+    }
+
+    private fun buildMessages(chatHistory: List<Chat>, newQuestion: String): List<Map<String, String>> {
+        val messages = mutableListOf<Map<String, String>>()
+
+        for (chat in chatHistory) {
+            messages.add(mapOf("role" to "user", "content" to chat.question))
+            messages.add(mapOf("role" to "assistant", "content" to chat.answer))
+        }
+
+        messages.add(mapOf("role" to "user", "content" to newQuestion))
+
+        return messages
     }
 }
