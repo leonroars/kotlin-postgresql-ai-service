@@ -1,5 +1,10 @@
 # kotlin-postgresql-ai-service
 
+## 프로젝트 요약
+ - AI 챗봇 백엔드 서비스 — 사용자가 AI와 멀티턴 대화를 나눌 수 있는 REST API 서버입니다.
+ - OpenAI Chat Completions API를 연동하고, 시간 기반 스레드 자동 관리로 대화 맥락을 유지합니다.
+ - AI Provider 교체에 비즈니스 로직이 영향받지 않도록 인터페이스를 분리하고, Profile 기반 Mock/Prod 전환으로 개발 편의성을 확보했습니다.
+
 ## 실행 방법
 ```bash
 # 1. PostgreSQL 실행
